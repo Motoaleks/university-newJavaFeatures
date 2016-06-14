@@ -1,0 +1,11 @@
+.green_back{
+    -fx-background-color: #3FC380;
+}
+
+.yellow_back{
+    -fx-background-color: #F4D03F;
+}
+
+.grey_back{
+    -fx-background-color: #EEEEEE;
+}
