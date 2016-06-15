@@ -1,4 +1,6 @@
-package Main.Models;
+package Main.resources;
+
+import Main.Models.SimpleLog;
 
 import java.util.Deque;
 import java.util.LinkedList;

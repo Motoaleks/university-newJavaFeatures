@@ -1,6 +1,11 @@
 package Main.Models.Data;
 
+import Main.resources.Log;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,10 +44,17 @@ public class AlcoholContainer implements CompleteData {
             storage.add(new Alcohol(line));
         };
 
-        //read file into stream, try-with-resources
-        try (Stream<String> stream = Files.lines(Paths.get(filename), Charset.forName("UTF-8"))) {
-            stream.filter(line -> !line.startsWith("#"))
-                    .forEach(addAlchohol);
+        InputStream in = Log.class.getResourceAsStream(filename);
+        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+
+        String line;
+        int i = 0;
+        try {
+            while ((line = input.readLine()) != null) {
+                if (!line.startsWith("#")){
+                    addAlchohol.accept(line);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

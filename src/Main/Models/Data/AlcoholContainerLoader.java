@@ -6,6 +6,7 @@ package Main.Models.Data;
  */
 
 import Main.Models.MessageManager;
+import Main.resources.Log;
 
 /**
  * Загружатель алкоголя из файла и возвращение. Интерфейс просто потому что надо static. Лучше было бы сделать класс.
@@ -16,6 +17,6 @@ public interface AlcoholContainerLoader {
      * @return контейнер с информацией об алкогольной продукции
      */
     static AlcoholContainer loadFromResourses(){
-       return new AlcoholContainer(AlcoholContainer.class.getResource("../../resources/data.csv").getPath().replaceFirst("/",""));
+       return new AlcoholContainer("data.csv");
     }
 }

@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class MessageManagerTest extends TestSuite {
     @Test
     public void readMessagesAndHasKey() throws Exception {
-        MessageManager.readMessages("res/messages.txt");
+        MessageManager.readMessages("messages.txt");
         assertFalse(MessageManager.empty());
         assertTrue(MessageManager.hasMessage("programm_name"));
     }

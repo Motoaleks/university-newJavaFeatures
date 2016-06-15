@@ -3,15 +3,12 @@ package Main;
 import Main.Models.Characters.Office;
 import Main.Models.Characters.PoolObserver;
 import Main.Models.Characters.Worker;
-import Main.Models.Log;
+import Main.UI.*;
+import Main.resources.Log;
 import Main.Models.MessageManager;
 import Main.Models.SimpleLog;
 import Main.Models.TimeManager;
 import Main.Models.Work.Task;
-import Main.UI.AddTaskInfo;
-import Main.UI.SortPain;
-import Main.UI.SimpleUI;
-import Main.UI.ListCellPerson;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -68,7 +65,9 @@ public class Main extends Application implements SimpleUI, PoolObserver, SimpleL
 
         taskView = (Accordion) mainScene.lookup("#taskView");
         TitledPane sort = new SortPain(this);
+        TitledPane find = new FindPain(this);
         taskView.getPanes().add(sort);
+        taskView.getPanes().add(find);
 
 
 
@@ -98,18 +97,11 @@ public class Main extends Application implements SimpleUI, PoolObserver, SimpleL
     public void start(Stage primaryStage) throws IOException {
         mainStage = primaryStage;
         String k = System.getProperty("user.dir");
-//        FXMLLoader loader = new FXMLLoader();
-//        loader.setLocation(Main.class.getResource("UI/mainForm.fxml"));
-//        Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
-//        FXMLLoader loader = new FXMLLoader();
-//        loader.setLocation(Main.class.getResource("Main.fxml"));
-//        Parent root = loader.load();
-//        Parent root = loader.load();
         Parent root = FXMLLoader.load(getClass().getResource("UI/mainForm.fxml"));
 
         mainScene = new Scene(root, 800, 600);
 
-        primaryStage.setTitle("StreamEra server");
+        primaryStage.setTitle("KDZ");
         primaryStage.setScene(mainScene);
         primaryStage.setResizable(true);
         primaryStage.setOnCloseRequest((value)->{

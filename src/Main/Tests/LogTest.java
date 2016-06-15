@@ -1,7 +1,7 @@
 package Main.Tests;
 
 import junit.framework.TestSuite;
-import Main.Models.Log;
+import Main.resources.Log;
 import org.junit.Test;
 
 import java.util.LinkedList;

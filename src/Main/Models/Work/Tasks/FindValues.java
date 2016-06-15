@@ -5,17 +5,14 @@ import Main.Models.Data.AlcoholContainer;
 import Main.Models.Work.Task;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * Created by Aleksand Smilyanskiy on 12.06.2016.
+ * Created by Aleksand Smilyanskiy on 15.06.2016.
  * "The more we do, the more we can do." ©
  */
-
-/**
- * Сортировка алкогольной продукции по одному из параметров
- */
-public class Sort extends Task<AlcoholContainer> {
+public class FindValues extends Task<AlcoholContainer> {
     /**
      * Параметры по которым сортируется (колонки)
      */
@@ -64,33 +61,29 @@ public class Sort extends Task<AlcoholContainer> {
          *
          * @return Comparator по выбранному параметру
          */
-        public Comparator<Alcohol> getComparator() {
+        public Predicate<Alcohol> getPredicate(Alcohol lower, Alcohol higher) {
             switch (parameterId) {
                 case 0: {
-                    return (o1, o2) -> o1.className.compareTo(o2.className);
+                    return (o1) -> (o1.className.compareTo(lower.className) == 0 && o1.className.compareTo(higher.className) == 0) ||
+                            (o1.className.compareTo(lower.className) == 1 && o1.className.compareTo(higher.className) == -1);
                 }
                 case 1: {
-                    return (o1, o2) -> o1.name.compareTo(o2.name);
+                    return (o1) -> (o1.name.compareTo(lower.name) == 0 && o1.name.compareTo(higher.name) == 0) ||
+                            (o1.name.compareTo(lower.name) == 1 && o1.name.compareTo(higher.name) == -1);
                 }
                 case 2: {
-                    return (o1, o2) -> o1.id.compareTo(o2.id);
+                    return (o1) -> (o1.id.compareTo(lower.id) == 0 && o1.id.compareTo(higher.id) == 0) ||
+                            (o1.id.compareTo(lower.id) == 1 && o1.id.compareTo(higher.id) == -1);
                 }
                 case 3: {
-                    return (o1, o2) -> {
-                        if (o1.litres < o2.litres) return -1;
-                        if (o1.litres > o2.litres) return 1;
-                        return 0;
-                    };
+                    return (o1) -> o1.litres >= lower.litres && o1.litres <= higher.litres;
                 }
                 case 4: {
-                    return (o1, o2) -> {
-                        if (o1.price < o2.price) return -1;
-                        if (o1.price > o2.price) return 1;
-                        return 0;
-                    };
+                    return (o1) -> o1.price >= lower.price && o1.price <= higher.price;
                 }
                 case 5: {
-                    return (o1, o2) -> o1.from.compareTo(o2.from);
+                    return (o1) -> (o1.from.compareTo(lower.from) == 0 && o1.from.compareTo(higher.from) == 0) ||
+                            (o1.from.compareTo(lower.from) == 1 && o1.from.compareTo(higher.from) == -1);
                 }
                 default:
                     return null;
@@ -136,12 +129,49 @@ public class Sort extends Task<AlcoholContainer> {
                 }
             }
         }
+
+        public Alcohol getAlcohol(Object object){
+            switch (parameterId) {
+                case 0: {
+                    Alcohol alcohol = new Alcohol();
+                    alcohol.className = (String) object;
+                    return alcohol;
+                }
+                case 1: {
+                    Alcohol alcohol = new Alcohol();
+                    alcohol.name = (String) object;
+                    return alcohol;
+                }
+                case 2: {
+                    Alcohol alcohol = new Alcohol();
+                    alcohol.id = (String) object;
+                    return alcohol;
+                }
+                case 3: {
+                    Alcohol alcohol = new Alcohol();
+                    alcohol.litres = (Integer) object;
+                    return alcohol;
+                }
+                case 4: {
+                    Alcohol alcohol = new Alcohol();
+                    alcohol.price = (Integer) object;
+                    return alcohol;
+                }
+                case 5: {
+                    Alcohol alcohol = new Alcohol();
+                    alcohol.from = (String) object;
+                    return alcohol;
+                }
+                default:
+                    return null;
+            }
+        }
     }
 
     /**
      * Параметр по которому сортируется
      */
-    private Parameter parameter;
+    private FindValues.Parameter parameter;
     /**
      * Контейнер для сортировки
      */
@@ -150,6 +180,9 @@ public class Sort extends Task<AlcoholContainer> {
      * После сортировки (если результаты разные, записываются друг за другом)
      */
     private Deque<AlcoholContainer> after = new LinkedList<>();
+
+    private Alcohol lower;
+    private Alcohol higher;
 
     /**
      * Добавление нового результата сортировки, если сортировка дала такой же результат - новый не добавляется
@@ -166,16 +199,13 @@ public class Sort extends Task<AlcoholContainer> {
         }
     }
 
-    /**
-     * Создание задачи - сортировка
-     *
-     * @param alcoholContainer Контейнер для сортировки
-     * @param parameter        {@link Sort#parameter}
-     */
-    public Sort(AlcoholContainer alcoholContainer, Parameter parameter) {
-        super("Sorting values by " + parameter.toString());
-        this.parameter = parameter;
+
+    public FindValues(AlcoholContainer alcoholContainer, Parameter parameter, Alcohol lower, Alcohol higher) {
+        super("Find values in" + parameter.toString());
         before = alcoholContainer;
+        this.parameter = parameter;
+        this.lower = lower;
+        this.higher = higher;
     }
 
     @Override
@@ -201,11 +231,13 @@ public class Sort extends Task<AlcoholContainer> {
 
     @Override
     protected void doSimple() {
-        Comparator<Alcohol> by = parameter.getComparator();
+        if (lower == null || higher == null)
+            return;
+        Predicate<Alcohol> by = parameter.getPredicate(lower,higher);
 
-        // 7., 8. Ссылки на методы/конструкторы
+
         Stream<Alcohol> stream = before.getStorage().stream();
-        AlcoholContainer resulted = stream.sorted(by).collect(
+        AlcoholContainer resulted = stream.filter(by).collect(
                 AlcoholContainer::new,
                 AlcoholContainer::addInfo,
                 AlcoholContainer::concatContainer
@@ -216,10 +248,13 @@ public class Sort extends Task<AlcoholContainer> {
 
     @Override
     protected void doParallel() {
-        Comparator<Alcohol> by = parameter.getComparator();
+        if (lower == null || higher == null)
+            return;
+        Predicate<Alcohol> by = parameter.getPredicate(lower,higher);
+
 
         Stream<Alcohol> stream = before.getStorage().stream();
-        AlcoholContainer resulted = stream.parallel().sorted(by).collect(
+        AlcoholContainer resulted = stream.parallel().filter(by).collect(
                 AlcoholContainer::new,
                 AlcoholContainer::addInfo,
                 AlcoholContainer::concatContainer
@@ -231,8 +266,14 @@ public class Sort extends Task<AlcoholContainer> {
     @Override
     protected void doJavaOld() {
         Vector<Alcohol> alcohols = (Vector<Alcohol>) before.getStorage().clone();
-        Collections.sort(alcohols, parameter.getComparator());
-        AlcoholContainer resulted = new AlcoholContainer(alcohols);
+        Vector<Alcohol> newVec = new Vector<>();
+        Predicate<Alcohol> by = parameter.getPredicate(lower,higher);
+        for (Alcohol alcohol:alcohols){
+            if (by.test(alcohol)){
+                newVec.add(alcohol);
+            }
+        }
+        AlcoholContainer resulted = new AlcoholContainer(newVec);
         addResult(resulted);
     }
 

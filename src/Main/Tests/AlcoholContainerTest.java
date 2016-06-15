@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class AlcoholContainerTest extends TestSuite {
     @Parameterized.Parameter
-    private final String file = "res/data.csv";
+    private final String file = "data.csv";
 
     @Test
     public void AGDtest() throws Exception {

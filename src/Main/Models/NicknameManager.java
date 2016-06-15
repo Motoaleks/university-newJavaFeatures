@@ -1,6 +1,8 @@
 package Main.Models;
 
-import java.io.IOException;
+import Main.resources.Log;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,13 +26,40 @@ public class NicknameManager {
     /**
      * Путь к файлу префиксов
      */
-    private static final String prefixesFile = NicknameManager.class.getResource("../resources/prefixes.txt").getPath().replaceFirst("/","");
+    private static final String prefixesFile = "prefixes.txt";
     /**
      * Путь к файлу корней
      */
-    private static final String rootsFile = NicknameManager.class.getResource("../resources/roots.txt").getPath().replaceFirst("/","");
+    private static final String rootsFile = "roots.txt";
 
     // privates
+
+    /**
+     * Считает кол-во строк в файле
+     * @param filename имя файла
+     * @return кол-во строчек
+     * @throws IOException ошибка при открытии
+     */
+    private static int countLines(String filename) throws IOException {
+        InputStream is = Log.class.getResourceAsStream(filename);
+        try {
+            byte[] c = new byte[1024];
+            int count = 0;
+            int readChars = 0;
+            boolean empty = true;
+            while ((readChars = is.read(c)) != -1) {
+                empty = false;
+                for (int i = 0; i < readChars; ++i) {
+                    if (c[i] == '\n') {
+                        ++count;
+                    }
+                }
+            }
+            return (count == 0 && !empty) ? 1 : count;
+        } finally {
+            is.close();
+        }
+    }
 
     /**
      * Чтение файла и получение случайной строки из него
@@ -43,36 +72,54 @@ public class NicknameManager {
         Path path = Paths.get(filename);
         int lineCount = 0;
         try {
-            lineCount = (int) Files.lines(path).count();
+            lineCount = countLines(filename);
         } catch (IOException e) {
             e.printStackTrace();
-            return "null";
         }
 
         // generate random int
         Random rnd = generator;
-        int line = rnd.nextInt(lineCount - 1);
-        line += 1;
+        int lineNum = rnd.nextInt(lineCount - 1);
+        lineNum += 1;
 
-        Stream<String> lines = null;
+        InputStream in = Log.class.getResourceAsStream(filename);
+        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+
+        String line;
+        int i = 0;
         try {
-            lines = Files.lines(Paths.get(filename));
+            while ((line = input.readLine()) != null) {
+                if (i++ != lineNum)
+                    continue;
+                return line;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return lines
-                .skip(line - 1)
-                .findFirst().orElse("null");
+        return "null";
+//        Stream<String> lines = null;
+//        try {
+//            lines = Files.lines(Paths.get(filename));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return lines
+//                .skip(line - 1)
+//                .findFirst().orElse("null");
     }
+
     /**
      * Получение префикса слова (обязательно)
+     *
      * @return префикс слова
      */
     private static String getPrefix() {
         return readFileGetRandom(prefixesFile);
     }
+
     /**
      * Получение корня слова
+     *
      * @return Корень слова или пустая строка
      */
     private static String getBase() {
@@ -82,8 +129,10 @@ public class NicknameManager {
         }
         return "";
     }
+
     /**
      * Получение окончания слова - цифры
+     *
      * @return окончание слова или пустая строка
      */
     private static String getEnd() {
@@ -99,6 +148,7 @@ public class NicknameManager {
 
     /**
      * Получение никнейма
+     *
      * @return новый никнейм
      */
     public static String getRandomNickname() {

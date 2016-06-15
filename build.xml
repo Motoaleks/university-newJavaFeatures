@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<project name="KDZ-final" default="main" basedir=".">
+    <description>Java project</description>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+
+    <!-- Sets variables which can later be used. -->
+    <!-- The value of a property is accessed via ${} -->
+    <property name="out.dir" location="out"/>
+    <property name="src.dir" location="src"/>
+    <property name="dist.dir" location="${out.dir}/ant"/>
+    <property name="build.dir" location="${dist.dir}/bin"/>
+    <property name="docs.dir" location="${dist.dir}/docs"/>
+    <!--<property name="src.lib" location="${basedir}"/>-->
+    <property name="lib.dir" location="lib"/>
+    <property name="ui.dir" location="${src.dir}/Main/UI"/>
+    <property name="zip.file" location="${dist.dir}/smilyanskiy_bpi142.zip"/>
+
+
+    <!-- Variables used for JUnit testing -->
+    <property name="test.dir" location="${src.dir}/Main/Tests"/>
+    <property name="test.report.dir" location="${dist.dir}/TestReports"/>
+
+    <!-- Define the classpath which includes the junit.jar and the classes after compiling-->
+    <path id="junit.class.path">
+        <pathelement location="lib/junit-4.12.jar"/>
+        <pathelement location="${build.dir}"/>
+    </path>
+
+    <!-- Create a classpath container which can be later used in the ant task -->
+    <path id="classpath">
+        <fileset dir="${src.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Deletes the existing directories-->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${docs.dir}"/>
+        <delete dir="${test.report.dir}"/>
+        <delete file="${zip.file}"/>
+        <!--<delete dir="${dist.dir}"/>-->
+    </target>
+
+    <!-- Creates the build and dist directory-->
+    <target name="init">
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${docs.dir}"/>
+        <mkdir dir="${test.report.dir}"/>
+    </target>
+
+    <!-- Compiles the java code (including the usage of library for JUnit -->
+    <target name="compile" depends="clean, init">
+        <javac srcdir="${src.dir}" destdir="${build.dir}">
+            <classpath refid="junit.class.path"/>
+        </javac>
+        <copy file="${src.dir}/Main/resources/data.csv" todir="${build.dir}/Main/resources"/>
+        <copy file="${src.dir}/Main/resources/messages.txt" todir="${build.dir}/Main/resources"/>
+        <copy file="${src.dir}/Main/resources/prefixes.txt" todir="${build.dir}/Main/resources"/>
+        <copy file="${src.dir}/Main/resources/roots.txt" todir="${build.dir}/Main/resources"/>
+        <copy file="${ui.dir}/mainForm.fxml" todir="${build.dir}/Main/UI"/>
+        <copy file="${ui.dir}/programm.css" todir="${build.dir}/Main/UI"/>
+        <copy file="${ui.dir}/taskView.fxml" todir="${build.dir}/Main/UI"/>
+    </target>
+
+    <!-- Runs the JUnit Tests, output is XML-->
+    <target name="junit" depends="compile">
+        <junit printsummary="on" fork="true" haltonfailure="yes">
+            <classpath refid="junit.class.path"/>
+            <formatter type="xml"/>
+            <batchtest todir="${test.report.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <!-- Generates the JavaDocs-->
+    <!--<target name="docs" depends="compile">-->
+        <!--<javadoc packagenames="*" sourcepath="${src.dir}" destdir="${docs.dir}" author="true" version="true" windowtitle="KDZ_final">-->
+            <!--<doctitle><![CDATA[<h1>Java KDZ</h1>]]></doctitle>-->
+            <!--<bottom><![CDATA[<i>Copyright &#169; 2016 Smilyanskiy Aleksandr 142 HSE. All Rights Reserved.</i>]]></bottom>-->
+            <!--<link offline="true" href="http://docs.oracle.com/javase/7/docs/api/" packagelistLoc="C:\tmp"/>-->
+            <!--<link href="http://docs.oracle.com/javase/7/docs/api/"/>-->
+        <!--</javadoc>-->
+
+        <!--<echo message = "java doc has been generated!" />-->
+    <!--</target>-->
+    <!-- Creates Javadoc -->
+    <target name="docs" depends="compile">
+        <javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+            <!-- Define which files / directory should get included, we include all -->
+            <fileset dir="${src.dir}">
+                <include name="**" />
+            </fileset>
+        </javadoc>
+    </target>
+
+
+    <!-- Generates the Zip archive-->
+    <target name="zip" depends="compile">
+        <zip destfile="${zip.file}" basedir="${basedir}" />
+    </target>
+
+    <!--The entering point for ant -->
+    <target name="main" depends="compile, junit, docs, zip">
+        <jar destfile="${dist.dir}/smilyanskiy_bpi142.jar">
+            <manifest>
+                <attribute name="Built-By" value="Aleksandr Smilyanskiy BSE142"/>
+                <attribute name="Main-Class" value="Main.Main"/>
+            </manifest>
+            <fileset dir="${build.dir}"/>
+        </jar>
+    </target>
+
+</project>
