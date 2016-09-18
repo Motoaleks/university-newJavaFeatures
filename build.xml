@@ -78,16 +78,6 @@
         </junit>
     </target>
 
-    <!-- Generates the JavaDocs-->
-    <!--<target name="docs" depends="compile">-->
-        <!--<javadoc packagenames="*" sourcepath="${src.dir}" destdir="${docs.dir}" author="true" version="true" windowtitle="KDZ_final">-->
-            <!--<doctitle><![CDATA[<h1>Java KDZ</h1>]]></doctitle>-->
-            <!--<bottom><![CDATA[<i>Copyright &#169; 2016 Smilyanskiy Aleksandr 142 HSE. All Rights Reserved.</i>]]></bottom>-->
-            <!--<link offline="true" href="http://docs.oracle.com/javase/7/docs/api/" packagelistLoc="C:\tmp"/>-->
-            <!--<link href="http://docs.oracle.com/javase/7/docs/api/"/>-->
-        <!--</javadoc>-->
-
-        <!--<echo message = "java doc has been generated!" />-->
     <!--</target>-->
     <!-- Creates Javadoc -->
     <target name="docs" depends="compile">
@@ -106,7 +96,7 @@
     </target>
 
     <!--The entering point for ant -->
-    <target name="main" depends="compile, junit, docs, zip">
+    <target name="main" depends="compile, docs, zip">
         <jar destfile="${dist.dir}/smilyanskiy_bpi142.jar">
             <manifest>
                 <attribute name="Built-By" value="Aleksandr Smilyanskiy BSE142"/>

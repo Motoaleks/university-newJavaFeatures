@@ -78,6 +78,14 @@ public class Alcohol {
         this.price = Double.valueOf(data[5] == null ? "0.0" : data[5]);
     }
 
+    /**
+     * Возвращает цену алкоголя
+     * @return цена
+     */
+    public double getPrice() {
+        return price;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == null) return false;

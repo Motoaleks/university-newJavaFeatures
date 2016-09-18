@@ -4,7 +4,9 @@ import Main.Models.Data.Alcohol;
 import Main.Models.Data.AlcoholContainer;
 import Main.Models.Work.Task;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Vector;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -130,7 +132,7 @@ public class FindValues extends Task<AlcoholContainer> {
             }
         }
 
-        public Alcohol getAlcohol(Object object){
+        public Alcohol getAlcohol(Object object) {
             switch (parameterId) {
                 case 0: {
                     Alcohol alcohol = new Alcohol();
@@ -206,6 +208,7 @@ public class FindValues extends Task<AlcoholContainer> {
         this.parameter = parameter;
         this.lower = lower;
         this.higher = higher;
+
     }
 
     @Override
@@ -233,7 +236,7 @@ public class FindValues extends Task<AlcoholContainer> {
     protected void doSimple() {
         if (lower == null || higher == null)
             return;
-        Predicate<Alcohol> by = parameter.getPredicate(lower,higher);
+        Predicate<Alcohol> by = parameter.getPredicate(lower, higher);
 
 
         Stream<Alcohol> stream = before.getStorage().stream();
@@ -250,8 +253,7 @@ public class FindValues extends Task<AlcoholContainer> {
     protected void doParallel() {
         if (lower == null || higher == null)
             return;
-        Predicate<Alcohol> by = parameter.getPredicate(lower,higher);
-
+        Predicate<Alcohol> by = parameter.getPredicate(lower, higher);
 
         Stream<Alcohol> stream = before.getStorage().stream();
         AlcoholContainer resulted = stream.parallel().filter(by).collect(
@@ -267,9 +269,9 @@ public class FindValues extends Task<AlcoholContainer> {
     protected void doJavaOld() {
         Vector<Alcohol> alcohols = (Vector<Alcohol>) before.getStorage().clone();
         Vector<Alcohol> newVec = new Vector<>();
-        Predicate<Alcohol> by = parameter.getPredicate(lower,higher);
-        for (Alcohol alcohol:alcohols){
-            if (by.test(alcohol)){
+        Predicate<Alcohol> by = parameter.getPredicate(lower, higher);
+        for (Alcohol alcohol : alcohols) {
+            if (by.test(alcohol)) {
                 newVec.add(alcohol);
             }
         }
@@ -280,6 +282,13 @@ public class FindValues extends Task<AlcoholContainer> {
     @Override
     protected void doOther() {
         String not_ready = "Fork/join framework sort is not implemented";
-        info.insert(0,not_ready).insert(not_ready.length(),"\n");
+        info.insert(0, not_ready).insert(not_ready.length(), "\n");
+
+        // Показать что умею работать с reduce, это влияет на скорость join/fork но он и так не реализован
+        Stream<Alcohol> stream = before.getStorage().stream();
+        double sum = stream
+                .map(Alcohol::getPrice)
+                .reduce(0.0, (a, b) -> a + b);
+        info.insert(0, "**Sum of prices in data: " + sum + "\n");
     }
 }
